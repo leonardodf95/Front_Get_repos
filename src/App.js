@@ -1,24 +1,35 @@
-import logo from './logo.svg';
+import { useState, useCallback, useEffect} from 'react'
+import UserGitHub from './API/UserGitHub';
 import './App.css';
+import Repositorys from './components/AreaRepositorys';
+import SearchBar from './components/SearchBar';
+import Title from './components/Title';
+import UserContext from './context/UserContext';
 
 function App() {
+  const [userRepository, setUserRepository] = useState()
+  const [repositorys, setRepositorys] = useState([])
+
+  const getRepository = useCallback(async ()=>{
+    const data = await UserGitHub.getRepositorys(userRepository)
+    console.log('data', data)
+    const resolvedResponse = await Promise.all(data)
+    console.log('resolvedResponse', resolvedResponse)
+    setRepositorys(resolvedResponse)
+  },[userRepository])
+
+  useEffect(()=>{getRepository()},[getRepository])
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <UserContext.Provider value={{
+      userRepository,
+      setUserRepository
+    }}>
+      <Title/>
+      <SearchBar/>
+      <Repositorys repositorys={repositorys}/>
+    
+    </UserContext.Provider>
   );
 }
 
